@@ -1,0 +1,287 @@
+ Database Interview
+
+	get data:
+	SELECT * FROM MyTable;
+
+	insert data:
+	INSERT INTO MyTable (Column1, Column2) 
+		VALUES (‘value1’, ‘value2’);
+
+	update data:
+	UPDATE MyTable 
+		SET Column1 = ‘value3’ 
+		WHERE Column1 = ‘value2’;
+
+	delete data:
+	DELETE 
+		FROM MyTable 
+		WHERE Column1 = ‘value3’;
+
+SELECT DISTINCT(column1)   not display repeated value from column1
+			FROM myTable;
+
+	SELECT COUNT(myColumn)  
+		FROM myTable;
+returns an integer – a count of rows that would be selected
+
+	SELECT SUM(column1) 
+		FROM myTable;
+returns a number (integer/double) – a sum of specified columns, from rows that would be selected – the column has to be a number
+
+	SELECT MIN(column1) 
+		FROM myTable;
+	SELECT MAX(column1) 
+		FROM myTable;
+used to select a min or a max of a certain column, the column has to be comparable (can be a number, text, dates)
+
+	SQL Server
+SELECT TOP 5 column1 
+	FROM myTable;
+	Oracle
+SELECT column1 
+	FROM myTable 
+	WHERE ROWNUM <= 5;
+limits the number of rows that are being returned
+
+	SELECT column_name(s)
+	INTO new_table_name 
+	FROM old_tablename
+allows you to insert the selected dataset into a different table
+
+Arithmetic Operators
+	SELECT 65 – workerAge  AS  yearsToRetirement
+		FROM workerTable;
+	SELECT workerName
+		FROM workerTable
+		WHERE 65 – workerAge < 5;
+
+Comparison Operators
+	SELECT * 
+		FROM myTable 
+		WHERE someColumn = NULL;  
+		(0 rows are selected => UNKNOWN)
+	SELECT * 
+		FROM myTable 
+		WHERE someColumn IS NULL; 
+		(will return expected result)
+		IS NOT NULL is opposite of IS NULL
+
+Character Operators – LIKE
+	using % - stands for wildcard
+	SELECT * 
+		FROM myTable 
+		WHERE Zip LIKE ‘132%’;
+	options
+	‘%someString’
+	‘someString%’
+	‘%someString%’
+	using _ - a single character wildcard
+	options
+	as a single char -> LIKE ‘1320_’
+	as multiple chars -> LIKE ‘132__’ or LIKE ‘1_20_’
+
+Character Operators - || or +
+	SELECT lastName + ‘, ‘ + firstName 
+		FROM someTable;
+		result -> 	Palider, Dusan
+				Palider, Cat
+
+Set Operators
+	UNION – rows from both datasets, EXCLUDING duplicates
+	UNION ALL – rows from both datasets, including duplicates
+	INTERSECT – rows found in both datasets
+	MINUS – rows that are not present in the other dataset (difference)
+	you can only union/… columns with the same name
+	a workaround, if your columns are not named the same way is to rename columns in the query.. example:
+	SELECT facultyName AS name FROM faculty
+	UNION
+	SELECT studentName AS name FROM students
+
+	IN, BETWEEN - both used when we are comparing to multiple values
+	IN – discrete  values
+	BETWEEN – a range of values
+	… WHERE column1 IN (1, 2, 3);
+	SELECT * 
+		FROM myTable 
+		WHERE column1 BETWEEN 1 AND 10;
+
+Order By
+	ORDER BY - used to order data by column(s)
+	you can order even by columns you are not selecting
+	SELECT * 
+		FROM myTable 
+		ORDER BY column1;
+	SELECT *
+		FROM myTable 
+		ORDER BY column1, column2;
+
+Order By – ASC, DESC
+	ASC – (default) ascending order (1, 2, 3…100)
+	DESC – descending order (100, 99, 98,…1)
+	SELECT * 
+		FROM myTable 
+		ORDER BY column1 DESC;
+	SELECT *
+		FROM myTable 
+		ORDER BY column1 ASC, column2 DESC;
+
+Group By
+	GROUP BY - used to group data by column(s)
+	can also group by columns you are not selecting
+	need to group by all selected columns, besides agregates
+	SELECT payee, SUM(amount)
+		FROM myBankAcct
+		GROUP BY payee;
+	SELECT payee, SUM(amount)
+		FROM myBankAcct
+		GROUP BY payee, monthOfCheck;
+
+Having Clause
+	HAVING - used to filter data in the GROUP BY clause
+	can combine multiple conditions by using AND/OR
+	can also use IN, BETWEEN and LIKE
+	SELECT payee, SUM(amount)
+		FROM myBankAcct
+		GROUP BY payee
+		HAVING SUM(amount) > 500;
+	… HAVING SUM(amount) > 500 AND year LIKE (‘201_’);
+
+Having Vs. Where
+	Where is applied on a single record level
+	Having is applied on the grouped result
+
+Combining Clauses
+	Order of clauses (you do not have to use all of these):
+	WHERE
+	GROUP BY
+	HAVING
+	 ORDER BY
+
+Subqueries
+	you can nest subqueries inside of other subqueries
+	you can use subquery’s values to filter the main query’s results (correlated queries)
+	SELECT * 
+		FROM orders O
+		WHERE O.Desc = (SELECT Desc
+				FROM part P
+				WHERE O.PartNum = P.PartNum);
+
+EXISTS
+	EXISTS – returns TRUE if subquery contains any rows and returns FALSE if subquery contains 0 rows
+	SELECT * 
+		FROM orders
+		WHERE EXISTS (SELECT *
+				FROM Parts
+				WHERE desc = ‘some part’);
+	CAREFUL – subquery will be TRUE or FALSE for the entire dataset, so either all or no records from orders will be displayed
+
+EXISTS cont’ed
+	to get the expected behavior (only show parts where the part description matches):
+	SELECT * 
+		FROM orders O
+		WHERE EXISTS (SELECT *
+				FROM parts P
+				WHERE P.desc = ‘some part’
+				AND O.partNum = P.partNum);
+	EXISTS does not care about the number of columns that are being selected (this data is selected, but never used/returned)
+	to improve performance, you can do the following:
+	SELECT * 
+		FROM orders O
+		WHERE EXISTS (SELECT 1
+				FROM parts P
+				WHERE P.desc = ‘some part’
+				AND O.partNum = P.partNum);
+
+String Functions
+	LEN – returns length of a string
+	SUBSTRING –returns a substring of a string
+	STR – converts from numbers into string
+	UPPER/LOWER – returns uppercase/lowercase versions of the string
+	|| or + -> concatenate
+	 INITCAP – capitalizes first letter (ORACLE)
+	REPLACE
+
+Date/Time Functions
+	DATEADD – adds time periods to dates
+	DATEDIFF – used to compare dates, to get the differences
+	GETDATE – returns current date/time
+	GETUTCDATE – returns current date/time in Universal Time Coordinate (Greenwich Time)
+	DAY/MONTH/YEAR – returns day/month/year from the date
+	LAST_DAY – returns last day of the month (ORACLE)
+
+Math Functions
+	ABS – absolute value
+	RAND – generates a random number
+	ROUND
+	SQUARE
+	CEIL
+	FLOOR
+	LN
+	LOG
+
+Conversion Functions
+	TO_CHAR
+	TO_NUMBER
+
+Data types
+	there are a number of different data types:
+	exact and approximate numerics
+	date and time
+	strings – character strings, unicode character strings and binary strings
+	other data types
+
+Identity
+	use for INT primary keys
+	IDENTITY(seed, increment)
+	IDENTITY(0, 1) – starts @ 0, increments by 1
+	Important
+	autogenerated (do not insert into it)
+	should not be shut off/bypassed
+
+Foreign Keys
+	reference a different table’s primary key
+	REFERENCES TableName(ColumnName)
+	CREATE TABLE Enrollment (
+		EnrollmentID	INT	PRIMARY KEY    IDENTITY(1, 1),
+		CourseID	INT	NOT NULL REFERENCES Courses(CourseID),
+		StudentID	VARCHAR(20)	NOT NULL REFERENCES Students(StudentID)
+	);
+
+Joins (Inner Join, Outter Join, Left Join, Right Join, Self Join)
+	allows you to join multiple tables into a single table 
+(for example table1.column1, table1.column2, table2.column3, table2.column4 
+can be joined into a result set containing all 4 columns)
+	SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate
+FROM Orders
+INNER JOIN Customers
+ON Orders.CustomerID=Customers.CustomerID;
+
+Functions vs. Stored Procs
+	functions cannot modify data or the DB
+	SPs can modify data or the DB
+	functions have to return exactly 1 value – can be scalar or table
+	SPs can return 1+ scalars, a table, or nothing
+	functions are called within other SQL
+	SELECT someFunc(someColumn) FROM myTable;
+	SELECT someFunc(someColumn), 
+			anotherFunc(anotherColumn) 
+		FROM myTable;
+	SPs are called separately at a time using EXEC
+
+Cursor
+	allows us to step through a dataset, examining one record at a time
+	in an SP, we can walk through an entire table, processing one row at a time
+	common uses
+	save query results for later
+	process data from an entire table (or multiple rows returned form a SELECT statement)
+
+
+
+
+
+
+
+
+
+
+
